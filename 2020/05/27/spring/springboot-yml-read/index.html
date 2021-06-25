@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spring Boot读取自定义yml文件 - aispring blog</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="aispring blog,小迎记,"> 
+    <meta name="description" content="aispring blog for myself,背景：Spring项目模块块开发，准备定义一个公共模块，定义常用的错误代码和提升信息，定义信息放在ErrorCodes.yml文件，直接用Spring Boot读取，子模块能够使用公共模块并能够扩展,"> 
+    <meta name="author" content="aispring"> 
+    <link rel="alternative" href="atom.xml" title="aispring blog" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+	<!-- <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({
+              google_ad_client: "ca-pub-8691406134231910",
+              enable_page_level_ads: true
+         });
+    </script>
+    <script async custom-element="amp-auto-ads"
+        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script> -->
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?4abacca86c9e391c0bdf1249e60d1a56";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>        
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">aispring blog</span>
+    <div id="loader"></div>
+    <div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://blog.aispring.cloud"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Spring Boot读取自定义yml文件</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Spring Boot读取自定义yml文件</h1>
+        <div class="stuff">
+            <span>五月 27, 2020</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/SpringBoot/" rel="tag">SpringBoot</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/yml/" rel="tag">yml</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p>背景：Spring项目模块块开发，准备定义一个公共模块，定义常用的错误代码和提升信息，定义信息放在ErrorCodes.yml文件，直接用Spring Boot读取，子模块能够使用公共模块并能够扩展ErrorCodes-*.yml文件</p>
+<h2 id="使用教程"><a href="#使用教程" class="headerlink" title="使用教程"></a>使用教程</h2><h3 id="新建文件"><a href="#新建文件" class="headerlink" title="新建文件"></a>新建文件</h3><p>在resources资源文件夹下新建文件 ErrorCodes.yml，格式如下</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">aispring:</span></span><br><span class="line">  <span class="attr">errors:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">code:</span> <span class="number">0</span></span><br><span class="line">      <span class="attr">message:</span> <span class="string">success</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">code:</span> <span class="number">-1</span></span><br><span class="line">      <span class="attr">message:</span> <span class="string">未知错误</span></span><br></pre></td></tr></table></figure>
+
+<p>这个时候直接用Spring Boot像读取application.yml中的变量是读取不到的，因为Spring Boot暂只支持直接读取application*.yml，像我们自定义的这种文件默认会当作properties来读取，需要我们自己写一个PropertySourceFactory自定义读取文件</p>
+<h3 id="自定义读取"><a href="#自定义读取" class="headerlink" title="自定义读取"></a>自定义读取</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cloud.aispring.core.factory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.config.YamlPropertiesFactoryBean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.env.YamlPropertySourceLoader;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.env.PropertiesPropertySource;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.env.PropertySource;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.io.support.DefaultPropertySourceFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.io.support.EncodedResource;</span><br><span class="line"><span class="keyword">import</span> org.springframework.lang.Nullable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Optional;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> spring.li</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/05/09</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CompositePropertySourceFactory</span> <span class="keyword">extends</span> <span class="title">DefaultPropertySourceFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;String&gt; yamlFiles = Arrays.asList(<span class="string">&quot;.yml&quot;</span>, <span class="string">&quot;.yaml&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 判断 yml 格式文件</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> sourceName 文件名</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 是否是yml文件</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">checkYamlFile</span><span class="params">(String sourceName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (String yamlFile : yamlFiles) &#123;</span><br><span class="line">            <span class="keyword">if</span> (sourceName.endsWith(yamlFile)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> PropertySource&lt;?&gt; createPropertySource(<span class="meta">@Nullable</span> String name, EncodedResource resource) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        String sourceName = Optional.ofNullable(name).orElse(resource.getResource().getFilename());</span><br><span class="line">        <span class="keyword">assert</span> sourceName != <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (!resource.getResource().exists()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> PropertiesPropertySource(sourceName, <span class="keyword">new</span> Properties());</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (checkYamlFile(sourceName)) &#123;</span><br><span class="line">            Properties propertiesFromYaml = loadYaml(resource);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> PropertiesPropertySource(sourceName, propertiesFromYaml);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.createPropertySource(name, resource);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * load yaml file to properties</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> resource resource</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> Properties</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Properties <span class="title">loadYaml</span><span class="params">(EncodedResource resource)</span> </span>&#123;</span><br><span class="line">        YamlPropertiesFactoryBean factory = <span class="keyword">new</span> YamlPropertiesFactoryBean();</span><br><span class="line">        factory.setResources(resource.getResource());</span><br><span class="line">        factory.afterPropertiesSet();</span><br><span class="line">        <span class="keyword">return</span> factory.getObject();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Bean读取"><a href="#Bean读取" class="headerlink" title="Bean读取"></a>Bean读取</h3><p>对应Bean读取信息，注意使用自定义的factory</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cloud.aispring.core.utils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cloud.aispring.core.exception.ErrorCode;</span><br><span class="line"><span class="keyword">import</span> cloud.aispring.core.factory.CompositePropertySourceFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.context.properties.ConfigurationProperties;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.PropertySource;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> spring.li</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/05/09</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@PropertySource(value = &#123;&quot;classpath:ErrorCodes.yml&quot;&#125;, factory = CompositePropertySourceFactory.class)</span></span><br><span class="line"><span class="meta">@ConfigurationProperties(prefix = &quot;aispring&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ErrorCodeUtils</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    List&lt;ErrorCode&gt; errors;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;ErrorCode&gt; <span class="title">getErrors</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> errors;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setErrors</span><span class="params">(List&lt;ErrorCode&gt; errors)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.errors = errors;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Test"><a href="#Test" class="headerlink" title="Test"></a>Test</h3><p>Test测试一下，需要注意SpringBootTest(classes = CoreApplication.class)启动整个程序才可以</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cloud.aispring.core;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cloud.aispring.core.utils.ErrorCodeUtils;</span><br><span class="line"><span class="keyword">import</span> cloud.aispring.core.test.IntegrationTest;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.logging.Log;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.logging.LogFactory;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.Test;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.test.context.SpringBootTest;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> spring.li</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/05/09</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="meta">@SpringBootTest(classes = CoreApplication.class)</span></span><br><span class="line"><span class="meta">@IntegrationTest</span></span><br><span class="line"><span class="meta">@AutoConfigureMockMvc</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestErrorCode</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    ErrorCodeUtils errorCodeUtils;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Log logger = LogFactory.getLog(getClass());</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">testErrorCodeUtils</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(errorCodeUtils.getErrors().size());</span><br><span class="line">        <span class="keyword">assert</span> errorCodeUtils.getErrors().size() == <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="读取多个文件"><a href="#读取多个文件" class="headerlink" title="读取多个文件"></a>读取多个文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">@Bean</span><br><span class="line">    public static PropertySourcesPlaceholderConfigurer properties() throws IOException &#123;</span><br><span class="line">        PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();</span><br><span class="line">        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();</span><br><span class="line">        //class 引入 通配符 匹配文件</span><br><span class="line">        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();</span><br><span class="line">        Resource[] resources1 = resolver.getResources(&quot;classpath*:ErrorCodes/*.yml&quot;);</span><br><span class="line">        // 默认</span><br><span class="line">        Resource[] resources2 = resolver.getResources(baseErrorCodesFileName);</span><br><span class="line">        if (resources1.length == 0 &amp;&amp; resources2.length == 0) &#123;</span><br><span class="line">            return configurer;</span><br><span class="line">        &#125;</span><br><span class="line">        Resource[] resources = new Resource[resources1.length + resources2.length];</span><br><span class="line">        System.arraycopy(resources1, 0, resources, 0, resources1.length);</span><br><span class="line">        System.arraycopy(resources2, 0, resources, resources1.length, resources2.length);</span><br><span class="line">        Properties[] properties = new Properties[resources.length];</span><br><span class="line">        for (int i = 0; i &lt; resources.length; i++) &#123;</span><br><span class="line">            yaml.setResources(resources[i]);</span><br><span class="line">            properties[i] = yaml.getObject();</span><br><span class="line">        &#125;</span><br><span class="line">        configurer.setPropertiesArray(properties);</span><br><span class="line">        return configurer;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls"
+                data-autoplay="true">
+                <source type="audio/mpeg" src="https://resource.aispring.cloud:30443/music/blog.mp3">
+            </audio>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+		data-enable='false'
+        data-ae='false'
+        data-ci=''
+        data-cs=''
+        data-r=''
+        data-o=''
+        data-a=''
+        data-d='false'
+    >查看评论</div>
+
+
+        </div>
+        
+        <div class='side'>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">使用教程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6"><span class="toc-number">1.1.</span> <span class="toc-text">新建文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%BB%E5%8F%96"><span class="toc-number">1.2.</span> <span class="toc-text">自定义读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Bean%E8%AF%BB%E5%8F%96"><span class="toc-number">1.3.</span> <span class="toc-text">Bean读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Test"><span class="toc-number">1.4.</span> <span class="toc-text">Test</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E5%A4%9A%E4%B8%AA%E6%96%87%E4%BB%B6"><span class="toc-number">1.5.</span> <span class="toc-text">读取多个文件</span></a></li></ol></li></ol>
+        </div>
+        
+</div>
+    </div>
+</div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;"></canvas>
+<script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+<script type="text/javascript" src="/js/fireworks.js"></script>
+
+
+</html>

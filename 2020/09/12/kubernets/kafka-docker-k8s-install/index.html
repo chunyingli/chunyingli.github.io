@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>使用Docker和K8s安装Kafka及Manger - aispring blog</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="aispring blog,小迎记,kafka,docker,k8s"> 
+    <meta name="description" content="aispring blog for myself,使用 docker 安装 kafka 及 manger注：本机 ip 192.168.66.201
+1.kafka 依赖 zookeeper，先安装 zookeeper12345docker run,"> 
+    <meta name="author" content="aispring"> 
+    <link rel="alternative" href="atom.xml" title="aispring blog" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+	<!-- <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({
+              google_ad_client: "ca-pub-8691406134231910",
+              enable_page_level_ads: true
+         });
+    </script>
+    <script async custom-element="amp-auto-ads"
+        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script> -->
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?4abacca86c9e391c0bdf1249e60d1a56";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>        
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">aispring blog</span>
+    <div id="loader"></div>
+    <div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://blog.aispring.cloud"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">使用Docker和K8s安装Kafka及Manger</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">使用Docker和K8s安装Kafka及Manger</h1>
+        <div class="stuff">
+            <span>九月 12, 2020</span>
+            
+
+        </div>
+        <div class="content markdown">
+            <h2 id="使用-docker-安装-kafka-及-manger"><a href="#使用-docker-安装-kafka-及-manger" class="headerlink" title="使用 docker 安装 kafka 及 manger"></a>使用 docker 安装 kafka 及 manger</h2><p>注：本机 ip 192.168.66.201</p>
+<h3 id="1-kafka-依赖-zookeeper，先安装-zookeeper"><a href="#1-kafka-依赖-zookeeper，先安装-zookeeper" class="headerlink" title="1.kafka 依赖 zookeeper，先安装 zookeeper"></a>1.kafka 依赖 zookeeper，先安装 zookeeper</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name zookeeper \</span><br><span class="line">	--publish 2181:2181 \</span><br><span class="line">	--volume /etc/localtime:/etc/localtime \</span><br><span class="line">	--restart=always \</span><br><span class="line">	wurstmeister/zookeeper</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装-kfaka"><a href="#2-安装-kfaka" class="headerlink" title="2.安装 kfaka"></a>2.安装 kfaka</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name kafka --publish 9092:9092 \</span><br><span class="line">    --link zookeeper \</span><br><span class="line">    --env KAFKA_ZOOKEEPER_CONNECT=192.168.66.201:2181 \</span><br><span class="line">    --env KAFKA_ADVERTISED_HOST_NAME=192.168.66.201 \</span><br><span class="line">    --env KAFKA_ADVERTISED_PORT=9092  \</span><br><span class="line">    --volume /etc/localtime:/etc/localtime \</span><br><span class="line">    --restart=always \</span><br><span class="line">    wurstmeister/kafka</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-安装-kafka-manger"><a href="#3-安装-kafka-manger" class="headerlink" title="3.安装 kafka manger"></a>3.安装 kafka manger</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name kafka-manager \</span><br><span class="line">    --link zookeeper:zookeeper \</span><br><span class="line">    --link kafka:kafka -p 9001:9000 \</span><br><span class="line">    --restart=always \</span><br><span class="line">    --env ZK_HOSTS=zookeeper:2181 \</span><br><span class="line">    sheepkiller/kafka-manager</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-验证和测试"><a href="#4-验证和测试" class="headerlink" title="4.验证和测试"></a>4.验证和测试</h3><p>直接访问 <a target="_blank" rel="noopener" href="http://192.168.66.201:9001/">http://192.168.66.201:9001/</a> 就可以直接使用了</p>
+<h2 id="使用-k8s-安装-kafka-及-manger"><a href="#使用-k8s-安装-kafka-及-manger" class="headerlink" title="使用 k8s 安装 kafka 及 manger"></a>使用 k8s 安装 kafka 及 manger</h2>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls"
+                data-autoplay="true">
+                <source type="audio/mpeg" src="https://resource.aispring.cloud:30443/music/blog.mp3">
+            </audio>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+		data-enable='false'
+        data-ae='false'
+        data-ci=''
+        data-cs=''
+        data-r=''
+        data-o=''
+        data-a=''
+        data-d='false'
+    >查看评论</div>
+
+
+        </div>
+        
+        <div class='side'>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-docker-%E5%AE%89%E8%A3%85-kafka-%E5%8F%8A-manger"><span class="toc-number">1.</span> <span class="toc-text">使用 docker 安装 kafka 及 manger</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-kafka-%E4%BE%9D%E8%B5%96-zookeeper%EF%BC%8C%E5%85%88%E5%AE%89%E8%A3%85-zookeeper"><span class="toc-number">1.1.</span> <span class="toc-text">1.kafka 依赖 zookeeper，先安装 zookeeper</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%AE%89%E8%A3%85-kfaka"><span class="toc-number">1.2.</span> <span class="toc-text">2.安装 kfaka</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%89%E8%A3%85-kafka-manger"><span class="toc-number">1.3.</span> <span class="toc-text">3.安装 kafka manger</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E9%AA%8C%E8%AF%81%E5%92%8C%E6%B5%8B%E8%AF%95"><span class="toc-number">1.4.</span> <span class="toc-text">4.验证和测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-k8s-%E5%AE%89%E8%A3%85-kafka-%E5%8F%8A-manger"><span class="toc-number">2.</span> <span class="toc-text">使用 k8s 安装 kafka 及 manger</span></a></li></ol>
+        </div>
+        
+</div>
+    </div>
+</div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;"></canvas>
+<script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+<script type="text/javascript" src="/js/fireworks.js"></script>
+
+
+</html>

@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Centos8安装K8s - aispring blog</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="aispring blog,小迎记,k8s,docker"> 
+    <meta name="description" content="aispring blog for myself,1、安装 Docker1. 添加依赖源1$ curl https://download.docker.com/linux/centos/docker-ce.repo -o /etc/yum.repo,"> 
+    <meta name="author" content="aispring"> 
+    <link rel="alternative" href="atom.xml" title="aispring blog" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+	<!-- <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({
+              google_ad_client: "ca-pub-8691406134231910",
+              enable_page_level_ads: true
+         });
+    </script>
+    <script async custom-element="amp-auto-ads"
+        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script> -->
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?4abacca86c9e391c0bdf1249e60d1a56";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>        
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">aispring blog</span>
+    <div id="loader"></div>
+    <div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://blog.aispring.cloud"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Centos8安装K8s</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Centos8安装K8s</h1>
+        <div class="stuff">
+            <span>六月 25, 2020</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/k8s/" rel="tag">k8s</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="1、安装-Docker"><a href="#1、安装-Docker" class="headerlink" title="1、安装 Docker"></a>1、安装 Docker</h2><h3 id="1-添加依赖源"><a href="#1-添加依赖源" class="headerlink" title="1. 添加依赖源"></a>1. 添加依赖源</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ curl https://download.docker.com/linux/centos/docker-ce.repo -o /etc/yum.repos.d/docker-ce.repo</span><br></pre></td></tr></table></figure>
+<h3 id="2-安装Docker"><a href="#2-安装Docker" class="headerlink" title="2. 安装Docker"></a>2. 安装Docker</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum -y install docker-ce</span><br></pre></td></tr></table></figure>
+<h3 id="3-设置Docker开机自启动"><a href="#3-设置Docker开机自启动" class="headerlink" title="3. 设置Docker开机自启动"></a>3. 设置Docker开机自启动</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl enable --now docker</span><br><span class="line">$ systemctl enable docker.service</span><br></pre></td></tr></table></figure>
+<h3 id="4-设置阿里云镜像源加速"><a href="#4-设置阿里云镜像源加速" class="headerlink" title="4. 设置阿里云镜像源加速"></a>4. 设置阿里云镜像源加速</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir -p /etc/docker</span><br><span class="line">$ sudo tee /etc/docker/daemon.json &lt;&lt;-&#x27;EOF&#x27;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://ie2mtbp8.mirror.aliyuncs.com&quot;]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">$ sudo systemctl daemon-reload</span><br><span class="line">$ sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<h2 id="2、安装-K8s"><a href="#2、安装-K8s" class="headerlink" title="2、安装 K8s"></a>2、安装 K8s</h2><h3 id="1-添加依赖源-1"><a href="#1-添加依赖源-1" class="headerlink" title="1. 添加依赖源"></a>1. 添加依赖源</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ cat &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt;EOF</span><br><span class="line">[kubernetes]</span><br><span class="line">name=Kubernetes</span><br><span class="line">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">repo_gpgcheck=0</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<h3 id="2-安装kubeadm"><a href="#2-安装kubeadm" class="headerlink" title="2. 安装kubeadm"></a>2. 安装kubeadm</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum install -y kubelet kubeadm kubectl</span><br></pre></td></tr></table></figure>
+<h3 id="3-设置Kubelet开机自启动"><a href="#3-设置Kubelet开机自启动" class="headerlink" title="3. 设置Kubelet开机自启动"></a>3. 设置Kubelet开机自启动</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl enable kubelet.service</span><br></pre></td></tr></table></figure>
+<h3 id="4-下载镜像"><a href="#4-下载镜像" class="headerlink" title="4. 下载镜像"></a>4. 下载镜像</h3><p>在墙外,需要科学上网</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubeadm config images pull</span><br></pre></td></tr></table></figure>
+<h3 id="5-禁用Swap"><a href="#5-禁用Swap" class="headerlink" title="5. 禁用Swap"></a>5. 禁用Swap</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/fstab</span><br><span class="line">/dev/mapper/cl-swap    &gt;&gt; # /dev/mapper/cl-swap</span><br><span class="line">$ echo vm.swappiness=0 &gt;&gt; /etc/sysctl.conf</span><br></pre></td></tr></table></figure>
+<h3 id="6-Docker设置Systemd"><a href="#6-Docker设置Systemd" class="headerlink" title="6. Docker设置Systemd"></a>6. Docker设置Systemd</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$  vim /etc/docker/daemon.json</span><br><span class="line">&quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;]</span><br></pre></td></tr></table></figure>
+<h3 id="7-初始化"><a href="#7-初始化" class="headerlink" title="7. 初始化"></a>7. 初始化</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kubeadm init  --pod-network-cidr=10.11.0.0/16</span><br><span class="line">$ mkdir -p $HOME/.kube</span><br><span class="line">$ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line">$ sudo chown $(id -u):$(id -g) $HOME/.kube/config</span><br></pre></td></tr></table></figure>
+<h3 id="8-安装-flannel"><a href="#8-安装-flannel" class="headerlink" title="8. 安装 flannel"></a>8. 安装 flannel</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$  kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml</span><br></pre></td></tr></table></figure>
+<h3 id="9-master-允许调度"><a href="#9-master-允许调度" class="headerlink" title="9. master 允许调度"></a>9. master 允许调度</h3><p>默认安装好后为master，并且有个taint不允许调度，如需master当作node可去除该taint即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl taint nodes --all node-role.kubernetes.io/master-</span><br></pre></td></tr></table></figure>
+<h3 id="10-修改端口范围"><a href="#10-修改端口范围" class="headerlink" title="10. 修改端口范围"></a>10. 修改端口范围</h3><p>默认端口范围为30000-32767</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">修改配置文件 vim /etc/kubernetes/manifests/kube-apiserver.yaml</span><br><span class="line">$  - command:</span><br><span class="line">   - kube-apiserver</span><br><span class="line">   # 添加如下一行</span><br><span class="line">   - --service-node-port-range=1-65535 </span><br></pre></td></tr></table></figure>
+
+<h2 id="2、K8s集群"><a href="#2、K8s集群" class="headerlink" title="2、K8s集群"></a>2、K8s集群</h2><h3 id="1-join-master"><a href="#1-join-master" class="headerlink" title="1. join master"></a>1. join master</h3><p>在其他服务器上安装kubeadm，然后安装master上init后的提示kubeadm join….  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm join 192.168.66.211:6443 --token ynw3rv.du4nm0ef6djh3293 --discovery-token-ca-cert-hash sha256:e639aa22ea901ab8956ea40069f36b30df72d9999b42144a610c73fa70485b2e</span><br></pre></td></tr></table></figure>
+<p>注意：token仅24小时有效，过期后需要重新生成，这里提供一个脚本在过期后一键生成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">if [ $EUID -ne 0 ];then</span><br><span class="line">    echo &quot;must be root (or sudo) to run this script&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ $# != 1 ] ; then</span><br><span class="line">    echo &quot;must input a param master-hostname | master-ip-address&quot;</span><br><span class="line">    echo &quot; e.g.: 192.168.66.66 or k8s.aispring.cloud&quot;</span><br><span class="line">    exit 1;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">token=`kubeadm token create`</span><br><span class="line">cert_hash=`openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed &#x27;s/^.* //&#x27;`</span><br><span class="line"></span><br><span class="line">echo &quot;Refer the following command to join kubernetes cluster:&quot;</span><br><span class="line">echo &quot;kubeadm join $1:6443 --token $&#123;token&#125; --discovery-token-ca-cert-hash sha256:$&#123;cert_hash&#125;&quot;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./generate_join_master.sh 192.168.66.211</span><br></pre></td></tr></table></figure>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls"
+                data-autoplay="true">
+                <source type="audio/mpeg" src="https://resource.aispring.cloud:30443/music/blog.mp3">
+            </audio>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+		data-enable='false'
+        data-ae='false'
+        data-ci=''
+        data-cs=''
+        data-r=''
+        data-o=''
+        data-a=''
+        data-d='false'
+    >查看评论</div>
+
+
+        </div>
+        
+        <div class='side'>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E5%AE%89%E8%A3%85-Docker"><span class="toc-number">1.</span> <span class="toc-text">1、安装 Docker</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96%E6%BA%90"><span class="toc-number">1.1.</span> <span class="toc-text">1. 添加依赖源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%AE%89%E8%A3%85Docker"><span class="toc-number">1.2.</span> <span class="toc-text">2. 安装Docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%AE%BE%E7%BD%AEDocker%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF%E5%8A%A8"><span class="toc-number">1.3.</span> <span class="toc-text">3. 设置Docker开机自启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%AE%BE%E7%BD%AE%E9%98%BF%E9%87%8C%E4%BA%91%E9%95%9C%E5%83%8F%E6%BA%90%E5%8A%A0%E9%80%9F"><span class="toc-number">1.4.</span> <span class="toc-text">4. 设置阿里云镜像源加速</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E5%AE%89%E8%A3%85-K8s"><span class="toc-number">2.</span> <span class="toc-text">2、安装 K8s</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96%E6%BA%90-1"><span class="toc-number">2.1.</span> <span class="toc-text">1. 添加依赖源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%AE%89%E8%A3%85kubeadm"><span class="toc-number">2.2.</span> <span class="toc-text">2. 安装kubeadm</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%AE%BE%E7%BD%AEKubelet%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF%E5%8A%A8"><span class="toc-number">2.3.</span> <span class="toc-text">3. 设置Kubelet开机自启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%8B%E8%BD%BD%E9%95%9C%E5%83%8F"><span class="toc-number">2.4.</span> <span class="toc-text">4. 下载镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E7%A6%81%E7%94%A8Swap"><span class="toc-number">2.5.</span> <span class="toc-text">5. 禁用Swap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-Docker%E8%AE%BE%E7%BD%AESystemd"><span class="toc-number">2.6.</span> <span class="toc-text">6. Docker设置Systemd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.7.</span> <span class="toc-text">7. 初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-%E5%AE%89%E8%A3%85-flannel"><span class="toc-number">2.8.</span> <span class="toc-text">8. 安装 flannel</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-master-%E5%85%81%E8%AE%B8%E8%B0%83%E5%BA%A6"><span class="toc-number">2.9.</span> <span class="toc-text">9. master 允许调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-%E4%BF%AE%E6%94%B9%E7%AB%AF%E5%8F%A3%E8%8C%83%E5%9B%B4"><span class="toc-number">2.10.</span> <span class="toc-text">10. 修改端口范围</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81K8s%E9%9B%86%E7%BE%A4"><span class="toc-number">3.</span> <span class="toc-text">2、K8s集群</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-join-master"><span class="toc-number">3.1.</span> <span class="toc-text">1. join master</span></a></li></ol></li></ol>
+        </div>
+        
+</div>
+    </div>
+</div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;"></canvas>
+<script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+<script type="text/javascript" src="/js/fireworks.js"></script>
+
+
+</html>
